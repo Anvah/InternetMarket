@@ -1,0 +1,21 @@
+﻿@model IEnumerable<Market.Models.Ad>
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Магазин</title>
+</head>
+<body>
+    <form asp-action="List" method="post">
+        <table class="table">
+            <tr><td>Название</td><td>Продавец</td><td>Город</td><td>Цена</td><td>Email</td><td>Телефон</td></tr>
+            @foreach (var item in Model)
+            {
+                <tr><td>@item.Name</td><td>@item.User.Name</td><td>@item.City</td><td>@String.Format("{0:C}", item.Price)</td><td>@item.User.Email</td><td>@item.User.Phone</td><td><button type="submit" name="AdId" id="@item.Id" value="@item.Id" class="styled">Удалить</button></td><td></td></tr>
+
+
+            }
+        </table>
+    </form>
+</body>
+</html>

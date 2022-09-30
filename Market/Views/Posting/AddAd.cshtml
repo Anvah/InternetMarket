@@ -1,0 +1,133 @@
+﻿@model Market.Models.ViewModels.PostingModel
+<!DOCTYPE html>
+<head>
+    <title>Магазин</title>
+    <link rel="shortcut icon" href="https://opencagedata.com/favicon.ico" type="image/x-icon">
+
+    <meta name='viewport' content='width=device-width, user-scalable=no initial-scale=1, maximum-scale=1'>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/css/L.Control.OpenCageGeocoding.min.css" />
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/js/L.Control.OpenCageGeocoding.min.js"></script>
+
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+
+        #map {
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 480px;
+        }
+    </style>
+</head>
+<body>
+    <form asp-action="AddAd" asp-controller="Posting" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label asp-for="Name" class="control-label">Имя</label>
+            <input type="text" asp-for="Name" class="form-control" style="width: 20%" />
+        </div>
+        <div class="form-group">
+            <label asp-for="City" class="control-label">Город</label>
+            <input type="text" asp-for="City" class="form-control" style="width: 20%" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Description" class="control-label">Описание</label>
+            <textarea type="text" asp-for="Description" class="form-control" style="width: 20%"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="Price" class="control-label">Цена</label>
+            <input type="number" asp-for="Price" class="form-control" style="width: 20%" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Category" control-label">Категория</label>
+            <input type="text" asp-for="Category" class="form-control" style="width: 20%" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Image">Фото</label>
+            <input asp-for="Image" type="file" accept="image/*" class="form-control" style="width: 20%" />
+        </div>
+        <div class="form-group">
+            <label>Адрес</label>
+            <input type="text" id="adress" class="form-control" style="width: 20%" />
+        </div>
+        <div class="form-group">
+            <label>Адрес</label>
+            <input type="text" id="coordinates" class="form-control" style="width: 20%" />
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Отправить" class="btn btn-default" />
+        </div>
+    </form>                
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div id="map"></div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <script type="text/javascript">
+            var latitude;
+            var longitude;
+            /*if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    latitude = position.coords.latitude;
+                    longitude = position.coords.longitude;
+                    alert(latitude + ' ' + longitude);
+                });
+
+            } else {
+                alert("Geolocation API не поддерживается в вашем браузере");
+            }*/
+            var map = L.map('map').setView([55.7522, 37.6156], 13);
+            var options = {
+                key: '3c38d15e76c02545181b07d3f8cfccf0', // REPLACE WITH YOUR API-KEY. This key might go away any time!
+                limit: 10
+            };
+            var geocoder = L.Control.OpenCageGeocoding.geocoder(options);
+            var control = L.Control.openCageGeocoding(options).addTo(map);
+            var marker;
+
+            /*L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);*/
+
+            L.tileLayer('https://{s}.tile.thunderforest.com/atlas/{z}/{x}/{y}{r}.png?apikey=224e9cefe709416d953c7c9177ef3ff7', {
+                attribution: 'Data <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors, Map tiles &copy; <a href="https://www.thunderforest.com/">Thunderforest</a>',
+                minZoom: 4,
+                maxZoom: 18
+            }).addTo(map);
+
+            map.on('click', function (e) {
+                var query = e.latlng.lat.toString() + ',' + e.latlng.lng.toString();
+                geocoder.geocode(query, function (results) {
+                    var r = results[0];
+                    
+                    if (r) {
+                        if (marker) {                          
+                            document.getElementById('adress').value = r.name;
+                            marker.setLatLng(r.center).setPopupContent(r.name).openPopup();
+                        } else {
+                            document.getElementById('adress').value = r.name;
+                            marker = L.marker(r.center).bindPopup(r.name).addTo(map).openPopup();
+                        }
+                    }
+                })
+                /*var adress = document.getElementById('adress').value;
+                geocoder.geocode(adress, function (results) {
+                    latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
+                    document.getElementById('coordinates').value = latLng;
+                });*/
+            })
+        </script>
+</body>

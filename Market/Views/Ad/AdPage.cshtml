@@ -1,0 +1,106 @@
+﻿@model Market.Models.Ad
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Магазин</title>
+    <link rel="shortcut icon" href="https://opencagedata.com/favicon.ico" type="image/x-icon">
+
+    <meta name='viewport' content='width=device-width, user-scalable=no initial-scale=1, maximum-scale=1'>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/css/L.Control.OpenCageGeocoding.min.css" />
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/opencagedata/leaflet-opencage-geocoding@v2.0.0/dist/js/L.Control.OpenCageGeocoding.min.js"></script>
+
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+
+        #map {
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 480px;
+        }
+    </style>
+</head>
+<body>
+    <form asp-action="Index" method="post">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h1>@Model.Name</h1>
+                    <p><img src="@Url.Content(Model.Image)" width="30%" height="30%"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h1>Цена: @String.Format("{0:C}", Model.Price)</h1>
+                </div>
+            </div>
+            <div class="row">
+                <h1>Контактная информация:</h1>
+                <h2> Имя: @Model.User.Name</h2>
+                <div class="col">
+                    <h2>Email</h2>
+                    <p>@Model.User.Email</p>
+                </div>
+                <div class="col">
+                    <h2>Телефон</h2>
+                    <p>@Model.User.Phone</p>
+                </div>
+                <div class="col">
+                    <h2>Город</h2>
+                    <p>@Model.City</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div id="map"></div>
+                </div>
+               
+            </div>
+        </div>
+       
+
+        <script type="text/javascript">
+            var map = L.map('map').setView([55.7522, 37.6156], 13);
+            var options = {
+                key: '3c38d15e76c02545181b07d3f8cfccf0', // REPLACE WITH YOUR API-KEY. This key might go away any time!
+                limit: 10
+            };
+            var geocoder = L.Control.OpenCageGeocoding.geocoder(options);
+            var control = L.Control.openCageGeocoding(options).addTo(map);
+            var marker;
+
+            /*L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);*/
+
+            L.tileLayer('https://{s}.tile.thunderforest.com/atlas/{z}/{x}/{y}{r}.png?apikey=224e9cefe709416d953c7c9177ef3ff7', {
+                attribution: 'Data <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors, Map tiles &copy; <a href="https://www.thunderforest.com/">Thunderforest</a>',
+                minZoom: 4,
+                maxZoom: 18
+            }).addTo(map);
+
+            map.on('click', function (e) {
+                var query = e.latlng.lat.toString() + ',' + e.latlng.lng.toString();
+                geocoder.geocode(query, function (results) {
+                    var r = results[0];
+                    if (r) {
+                        if (marker) {
+                            marker.setLatLng(r.center).setPopupContent(r.name).openPopup();
+                        } else {
+                            marker = L.marker(r.center).bindPopup(r.name).addTo(map).openPopup();
+                        }
+                    }
+                })
+            })
+        </script>
+    </form>
+</body>
+</html>
